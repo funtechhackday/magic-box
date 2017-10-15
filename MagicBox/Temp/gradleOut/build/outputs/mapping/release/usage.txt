@@ -1,0 +1,6 @@
+ru.annathebest.magicbox.BuildConfig
+ru.annathebest.magicbox.R
+ru.annathebest.magicbox.R$attr
+ru.annathebest.magicbox.R$drawable
+ru.annathebest.magicbox.R$string
+ru.annathebest.magicbox.R$style

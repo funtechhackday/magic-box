@@ -1,0 +1,65 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+// http://answers.unity3d.com/questions/419718/camera-orbit-around-target-on-touch-device.html?sort=newest
+public class OrbitCamera : MonoBehaviour {
+    public Transform target;
+    private Touch touch;
+    private float pinchSpeed = 10;
+
+    private float x = 0.0f, y = 0.0f;
+    private float curDist = 0.0f, lastDist = 0.0f;
+    private float distance = 20.0f;
+    private float yMinLimit = -20, yMaxLimit = 80;
+    private float cameraSpeed = 1.0f;
+
+    void LateUpdate() {
+        float xSpeed = 250.0f, ySpeed = 120.0f;
+
+        if (target && GetComponent<Camera>()) {
+             if (Input.touchCount == 1 && 
+                     Input.GetTouch(0).phase == TouchPhase.Moved) 
+             {
+                 touch = Input.GetTouch(0);
+                 x += touch.deltaPosition.x * xSpeed * 0.02f;
+                 y -= touch.deltaPosition.y * ySpeed * 0.02f;
+             }
+
+             if (Input.touchCount > 1 && 
+                     (Input.GetTouch(0).phase == TouchPhase.Moved 
+                      || Input.GetTouch(1).phase == TouchPhase.Moved)) 
+             {
+                 var touch1 = Input.GetTouch(0);
+                 var touch2 = Input.GetTouch(1);
+                 curDist = Vector2.Distance(touch1.position, touch2.position);
+             
+                 if(curDist > lastDist)
+                 {
+                     distance += Vector2.Distance(touch1.deltaPosition, touch2.deltaPosition)*pinchSpeed/10;
+                 }
+                 
+                 else
+                 {
+                     distance -= Vector2.Distance(touch1.deltaPosition, touch2.deltaPosition)*pinchSpeed/10;
+                 }
+                 lastDist = curDist;
+             }
+
+             y = ClampAngle(y, yMinLimit, yMaxLimit);
+             var rotation= Quaternion.Euler(y, x, 0);
+             var vTemp = new Vector3(0.0f, 0.0f, -distance);
+             var position= rotation * vTemp + target.position;
+             transform.position = Vector3.Lerp (transform.position, position, cameraSpeed*Time.deltaTime);
+             transform.rotation = rotation;      
+        }
+    }
+
+    static float ClampAngle (float angle, float min, float max) { 
+        if (angle < -360) 
+            angle += 360; 
+        if (angle > 360) 
+            angle -= 360; 
+        return Mathf.Clamp (angle, min, max); 
+    }
+}
